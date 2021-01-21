@@ -4,7 +4,7 @@ import java.util.*;
 
 public class CustomerService {
 
-    private TreeMap<Customer, String> customers = new TreeMap<>(Comparator.comparingLong(Customer::getScores));
+    private NavigableMap<Customer, String> customers = new TreeMap<>(Comparator.comparingLong(Customer::getScores));
 
     public Map.Entry<Customer, String> getSmallest() {
         Map.Entry<Customer, String> firstCustomer = customers.firstEntry();
