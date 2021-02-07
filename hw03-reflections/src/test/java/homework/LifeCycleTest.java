@@ -48,14 +48,15 @@ class LifeCycleTest {
     }
 
     @After
-    public void after1() {
-        System.out.print("@After: after1 ");
+    public void badAfter() {
+        System.out.print("@After: badAfter ");
         System.out.println("Экземпляр тестового класса: " + Integer.toHexString(hashCode()));
+        throw new UnsupportedOperationException("Нечто непредвиденное в after-методе");
     }
 
     @After
-    public void after2() {
-        System.out.print("@After: after2 ");
+    public void goodAfter() {
+        System.out.print("@After: goodAfter ");
         System.out.println("Экземпляр тестового класса: " + Integer.toHexString(hashCode()));
     }
 

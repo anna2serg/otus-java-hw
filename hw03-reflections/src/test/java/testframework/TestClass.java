@@ -28,6 +28,11 @@ public class TestClass<T> {
         classParse();
     }
 
+    public List<TestMethod> execute() {
+        testMethodList.forEach(this::testMethodExecute);
+        return Collections.unmodifiableList(testMethodList);
+    }
+
     private void classParse() {
         Method[] classMethods = clazz.getDeclaredMethods();
         Arrays.stream(classMethods).forEach(this::methodParse);
@@ -38,14 +43,14 @@ public class TestClass<T> {
         boolean isTestMethod = false;
         String testName = "";
         for (Annotation annotation : annotations) {
-            String annotationName = annotation.annotationType().getName();
-            if ((Objects.equals(Before.class.getName(), annotationName))) {
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            if (annotationType.equals(Before.class)) {
                 beforeMethodList.add(method);
-            } else if ((Objects.equals(Test.class.getName(), annotationName))) {
+            } else if (annotationType.equals(Test.class)) {
                 isTestMethod = true;
-            } else if ((Objects.equals(After.class.getName(), annotationName))) {
+            } else if (annotationType.equals(After.class)) {
                 afterMethodList.add(method);
-            } else if ((Objects.equals(DisplayName.class.getName(), annotationName))) {
+            } else if (annotationType.equals(DisplayName.class)) {
                 testName = method.getAnnotation(DisplayName.class).value();
             }
         }
@@ -57,6 +62,16 @@ public class TestClass<T> {
         }
     }
 
+    private void processFailedTest(TestMethod testMethod, Exception e) {
+        if (Objects.isNull(testMethod.getThrowable())) {
+            testMethod.setThrowable(e);
+        } else {
+            Throwable baseThrowable = testMethod.getThrowable();
+            baseThrowable.addSuppressed(e);
+        }
+        testMethod.setState(TestState.FAILED);
+    }
+
     private void testMethodExecute(TestMethod testMethod) {
         T classInstance = getClassInstance();
         try {
@@ -64,10 +79,13 @@ public class TestClass<T> {
             methodExecute(classInstance, testMethod.getMethod());
             testMethod.setState(TestState.PASSED);
         } catch (Exception e) {
-            testMethod.setThrowable(e);
-            testMethod.setState(TestState.FAILED);
+            processFailedTest(testMethod, e);
         } finally {
-            afterMethodList.forEach(afterMethod -> methodExecute(classInstance, afterMethod));
+            try {
+                afterMethodList.forEach(afterMethod -> methodExecute(classInstance, afterMethod));
+            } catch (Exception e) {
+                processFailedTest(testMethod, e);
+            }
         }
     }
 
@@ -88,11 +106,6 @@ public class TestClass<T> {
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e.getCause());
         }
-    }
-
-    public List<TestMethod> execute() {
-        testMethodList.forEach(this::testMethodExecute);
-        return Collections.unmodifiableList(testMethodList);
     }
 
 }
