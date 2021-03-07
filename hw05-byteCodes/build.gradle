@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow'
+}
+
+sourceCompatibility = JavaVersion.VERSION_15
+targetCompatibility = JavaVersion.VERSION_15
+
+dependencies {
+    implementation group: 'org.javassist', name: 'javassist', version: '3.27.0-GA'
+}
+
+task shadowDemoAop(type: Jar, dependsOn: shadowJar) {
+    archiveBaseName.set('proxyDemo')
+    manifest {
+        attributes 'Main-Class': 'ru.otus.aop.DemoAop'
+        attributes 'Premain-Class': 'ru.otus.aop.Agent'
+    }
+    from zipTree(shadowJar.archiveFile)
+}
+
+tasks.build.dependsOn tasks.shadowDemoAop
