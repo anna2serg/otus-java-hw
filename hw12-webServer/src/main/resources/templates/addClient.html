@@ -1,0 +1,26 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Клиенты</title>
+    <link href="css/style.css" rel="stylesheet" />
+</head>
+<body>
+<h4>Добавление клиента</h4>
+<form action="addClient" method="post">
+    <div>
+        <label for="name">Наименование</label>
+        <input type="text" id="name" name="client_name" value="Лучший клиент">
+    </div>
+    <div>
+        <label for="phone">Контактный телефон</label>
+        <input type="text" id="phone" name="client_phone" value="123-456">
+    </div>
+    <div>
+        <label for="address">Юридический адрес</label>
+        <textarea id="address" name="client_address">ул.Деловая</textarea>
+    </div>
+    <div>
+        <button type="submit">Создать</button>
+    </div>
+</form>
+</body>
+</html>
