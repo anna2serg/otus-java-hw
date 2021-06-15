@@ -7,14 +7,14 @@ import ru.otus.appcontainer.api.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class AppComponentsContainerImpl implements AppComponentsContainer {
 
+    private final List<Object> appComponents = new ArrayList<>();
     private final List<AppComponentDescriptor> appComponentDescriptors = new ArrayList<>();
-    private final Map<String, Object> appComponents = new HashMap<>();
+    private final Map<String, Object> appComponentsByName = new HashMap<>();
     private final static int APP_COMPONENT_ORDER_SHIFT = 100;
 
     public AppComponentsContainerImpl(String packageName) {
@@ -74,67 +74,57 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
 
     private void instantiateAppComponents() {
         this.appComponentDescriptors.forEach(appComponentDescriptor -> {
+            Object appComponent;
             if (Objects.nonNull(appComponentDescriptor.getFactoryComponent())
                     && Objects.nonNull(appComponentDescriptor.getFactoryMethod())) {
-                instantiateUsingFactoryMethod(appComponentDescriptor);
+                appComponent = instantiateUsingFactoryMethod(appComponentDescriptor);
             } else {
-                instantiateByNoArgsConstructor(appComponentDescriptor);
+                appComponent = instantiateByNoArgsConstructor(appComponentDescriptor);
             }
+            appComponents.add(appComponent);
+            appComponentsByName.put(appComponentDescriptor.getName(), appComponent);
         });
     }
 
-    private void instantiateByNoArgsConstructor(AppComponentDescriptor appComponentDescriptor) {
+    private Object instantiateByNoArgsConstructor(AppComponentDescriptor appComponentDescriptor) {
         Class<?> clazz = appComponentDescriptor.getClazz();
         Constructor<?>[] constructors = clazz.getConstructors();
         try {
-            Object appComponent = constructors[0].newInstance();
-            appComponents.put(appComponentDescriptor.getName(), appComponent);
+            return constructors[0].newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            throw new AppComponentsContainerException(String.format("Component %s instantiation error: %s",
+                    clazz.getName(), e.getMessage()), e);
         }
     }
 
-    private void instantiateUsingFactoryMethod(AppComponentDescriptor appComponentDescriptor) {
-        Object[] arguments = null;
+    private Object instantiateUsingFactoryMethod(AppComponentDescriptor appComponentDescriptor) {
         Method factoryMethod = appComponentDescriptor.getFactoryMethod();
         AppComponentDescriptor factoryComponentDescriptor = appComponentDescriptor.getFactoryComponent();
-        Object factoryComponent = getAppComponent(factoryComponentDescriptor.getClazz());
-        if (factoryMethod.getParameterCount()>0) {
-            arguments = new Object[factoryMethod.getParameterCount()];
-            Parameter[] appComponentParams = factoryMethod.getParameters();
-            for (int i = 0; i < factoryMethod.getParameterCount(); i++) {
-                Parameter param = appComponentParams[i];
-                Class<?> paramClass = param.getType();
-                arguments[i] = getAppComponent(paramClass);
-            }
-        }
+        Class<?> factoryComponentClazz = factoryComponentDescriptor.getClazz();
+        Object factoryComponent = getAppComponent(factoryComponentClazz);
+        Object[] arguments = Arrays.stream(factoryMethod.getParameterTypes()).map(this::getAppComponent).toArray();
         try {
-            Object appComponent = factoryMethod.invoke(factoryComponent, arguments);
-            appComponents.put(appComponentDescriptor.getName(), appComponent);
+            return factoryMethod.invoke(factoryComponent, arguments);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            throw new AppComponentsContainerException(String.format("Component %s instantiation error: %s",
+                    factoryComponentClazz.getName(), e.getMessage()), e);
         }
     }
 
     @Override
     public <C> C getAppComponent(Class<C> componentClass) {
-        for (Map.Entry<String, Object> entry : appComponents.entrySet()) {
-            Object appComponent = entry.getValue();
-            if (componentClass.isAssignableFrom(appComponent.getClass())) {
-                return (C) entry.getValue();
-            }
-        }
-        throw new AppComponentNotFound(componentClass);
+        Object appComponent = appComponents.stream().filter(component -> componentClass.isAssignableFrom(component.getClass()))
+                .findFirst().orElseThrow(() -> new AppComponentNotFoundException(componentClass));
+        return (C) appComponent;
     }
 
     @Override
     public <C> C getAppComponent(String componentName) {
-        for (String key : appComponents.keySet()) {
-            if (componentName.equals(key)) {
-                return (C) appComponents.get(key);
-            }
+        Object appComponent = appComponentsByName.get(componentName);
+        if (Objects.nonNull(appComponent)) {
+            return (C) appComponent;
         }
-        throw new AppComponentNotFound(componentName);
+        throw new AppComponentNotFoundException(componentName);
     }
 
 }
