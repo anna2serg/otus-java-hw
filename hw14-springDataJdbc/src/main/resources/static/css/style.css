@@ -1,0 +1,60 @@
+body {
+    font-family: Geneva, Arial, Helvetica, sans-serif;
+    font-size: medium;
+    color: darkslateblue;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 5px;
+    border: 1px solid lightskyblue;
+}
+
+a {
+    display: inline-block;
+    background-color: darkslateblue;
+    color: white;
+    margin-top: 20px;
+    padding: 5px;
+    text-decoration: none;
+}
+
+button, button[type=submit] {
+    color: white;
+    background: darkslateblue;
+    border: 0 none;
+    cursor: pointer;
+    font-size: medium;
+    padding: 5px;
+    margin-top: 10px;
+}
+
+label, input, textarea {
+    font-family: Geneva, Arial, Helvetica, sans-serif;
+    font-size: medium;
+    color: darkslateblue;
+    display: inline-block;
+    vertical-align: baseline;
+    width: 400px;
+    padding: 5px;
+}
+
+input, textarea {
+    border: 1px solid lightskyblue;
+}
+
+textarea {
+    height: 200px;
+}
+
+label {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+form {
+    width: 500px;
+}
