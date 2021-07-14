@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Добавление клиента</title>
+    <link href="../css/style.css" rel="stylesheet" />
+</head>
+<body>
+<h4>Добавление клиента</h4>
+<form action="#" th:action="@{/client/save}" method="post" th:object="${client}" accept-charset="utf-8">
+    <div>
+        <label for="name">Наименование</label>
+        <input type="text" id="name" name="name" value="Лучший клиент" th:value="*{name}">
+    </div>
+    <div th:each="phone,itemStat:*{phones}">
+        <label for="phone" th:for="phone + ${itemStat.index}" th:text="'Контактный телефон №' + ${itemStat.index+1}"></label>
+        <input type="text" id="phone" th:id="phone + ${itemStat.index}" th:field="*{phones[__${itemStat.index}__].number}" value="111-222"/>
+    </div>
+    <button type="submit" name="addPhone">Добавить телефон</button>
+    <div>
+        <label for="address">Юридический адрес</label>
+        <textarea id="address" name="address" th:field="*{address.street}">ул.Деловая</textarea>
+    </div>
+    <div>
+        <button type="submit">Создать</button>
+    </div>
+</form>
+</body>
+</html>
