@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8"/>
+    <title>Список клиентов</title>
+    <link href="../css/style.css" rel="stylesheet" />
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/app.js"></script>
+</head>
+<body onload="init()">
+    <h4>Получить клиента по Id</h4>
+    <input type="text" id = "clientIdTextBox" value="1" placeholder="Введите ид клиента">
+    <button onclick="getClientById()">Получить</button>
+        <pre id = "clientDataContainer"></pre>
+
+    <div>
+      <h4>Создать клиента из json</h4>
+      <textarea id="clientJson" name="client_json">{"name":"Лучший клиент на свете","address":{"street":"ул.  Лучшая"},"phones":[{"number":"777-000"},{"number":"777-111"}]}</textarea>
+      <button type="submit" onclick="addClientFromJson()">Создать</button>
+    </div>
+
+    <h4>Список клиентов</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Имя</th>
+                <th>Адрес</th>
+                <th>Телефоны</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <a th:href="@{/client/add}" href="addClient">Добавить клиента</a>
+</body>
+</html>
