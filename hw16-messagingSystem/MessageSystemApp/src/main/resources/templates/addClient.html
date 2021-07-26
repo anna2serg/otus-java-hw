@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Добавление клиента</title>
+    <link href="../css/style.css" rel="stylesheet" />
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/app.js"></script>
+</head>
+<body onload="init()">
+<h4>Добавление клиента</h4>
+<form accept-charset="utf-8">
+    <div>
+        <label for="clientName">Наименование</label>
+        <input type="text" id="clientName" name="name" value="Лучший клиент">
+    </div>
+    <div id="clientPhones">
+        <label for="clientPhone1">Контактный телефон №1</label>
+        <input type="text" id="clientPhone1" value=""/>
+    </div>
+    <button onclick="addPhone(event)">Добавить телефон</button>
+    <div>
+        <label for="clientAddress">Юридический адрес</label>
+        <textarea id="clientAddress" name="address">ул.Деловая</textarea>
+    </div>
+    <div>
+        <button onclick="addClient(event)">Создать</button>
+    </div>
+</form>
+</body>
+</html>
